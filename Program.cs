@@ -30,6 +30,6 @@ app.MapFallbackToPage("/_Host");
 
 
 // Establecer el puerto de escucha en 80
-//app.Urls.Add("http://*:80");
+app.Urls.Add("http://*:80");
 
 app.Run();
