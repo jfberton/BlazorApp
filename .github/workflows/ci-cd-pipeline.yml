@@ -1,0 +1,49 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore ./BlazorApp/BlazorApp.csproj
+
+      - name: Build the app
+        run: dotnet build --configuration Release ./BlazorApp/BlazorApp.csproj
+
+      - name: Publish the app
+        run: dotnet publish --configuration Release --output ./publish ./BlazorApp/BlazorApp.csproj
+
+      - name: Build Docker image
+        run: docker build -t myblazorapp:latest .
+
+      - name: Push Docker image to GitHub Container Registry
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          docker tag myblazorapp:latest ghcr.io/${{ github.repository_owner }}/myblazorapp:latest
+          docker push ghcr.io/${{ github.repository_owner }}/myblazorapp:latest
+
+      - name: Deploy to QA
+        uses: appleboy/ssh-action@v0.1.3
+        with:
+          host: ${{ secrets.QA_SERVER_HOST }}
+          username: ${{ secrets.QA_SERVER_USER }}
+          key: ${{ secrets.QA_SERVER_SSH_KEY }}
+          script: |
+            docker pull ghcr.io/${{ github.repository_owner }}/myblazorapp:latest
+            docker stop myblazorapp_container || true
+            docker rm myblazorapp_container || true
+            docker run -d -p 8080:80 --name myblazorapp_container ghcr.io/${{ github.repository_owner }}/myblazorapp:latest
