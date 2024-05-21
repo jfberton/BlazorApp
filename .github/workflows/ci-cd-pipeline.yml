@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - master
+      - master  # Usar la rama master
 
 jobs:
   build:
@@ -19,13 +19,13 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore ./BlazorApp/BlazorApp.csproj
+        run: dotnet restore BlazorApp/BlazorApp.csproj  # Ajuste de ruta
 
       - name: Build the app
-        run: dotnet build --configuration Release ./BlazorApp/BlazorApp.csproj
+        run: dotnet build --configuration Release BlazorApp/BlazorApp.csproj  # Ajuste de ruta
 
       - name: Publish the app
-        run: dotnet publish --configuration Release --output ./publish ./BlazorApp/BlazorApp.csproj
+        run: dotnet publish --configuration Release --output ./publish BlazorApp/BlazorApp.csproj  # Ajuste de ruta
 
       - name: Build Docker image
         run: docker build -t myblazorapp:latest .
