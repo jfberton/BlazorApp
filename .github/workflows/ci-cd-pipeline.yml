@@ -38,3 +38,29 @@ jobs:
 
       - name: Push Docker image to Docker Hub
         run: docker push "${{ secrets.DOCKER_USERNAME }}"/myblazorapp:latest
+
+      - name: Send success mail
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Pipeline Succeeded: ${{ github.workflow }}"
+          body: "Exito!, la ultima version del app esta publicada correctamente en DockerHub."
+          to: ${{ secrets.TO_EMAIL }}
+          from: ${{ secrets.FROM_EMAIL }}
+
+      - name: Send failure mail
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Pipeline Failed: ${{ github.workflow }}"
+          body: "Error :( Ocurrio un error y no se pudo publicar el app, revisa la ejecucion para mas detalles"
+          to: ${{ secrets.TO_EMAIL }}
+          from: ${{ secrets.FROM_EMAIL }}
