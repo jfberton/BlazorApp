@@ -30,6 +30,7 @@ app.MapFallbackToPage("/_Host");
 
 
 // Establecer el puerto de escucha en 80
-app.Urls.Add("http://*:80");
+//solucion agregue un appsettings.produccion.json con el kestrel apuntando al puerto 80
+//app.Urls.Add("http://*:80");
 
 app.Run();
