@@ -24,6 +24,9 @@ jobs:
       - name: Build the app
         run: dotnet build --configuration Release ./BlazorApp.csproj  # Ruta correcta
 
+      - name: Run tests
+        run: dotnet test --no-build --verbosity normal ./BlazorApp.Tests/BlazorApp.Tests.csproj  # Ruta correcta
+
       - name: Publish the app
         run: dotnet publish --configuration Release --output ./publish ./BlazorApp.csproj  # Ruta correcta
 
