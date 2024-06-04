@@ -55,7 +55,6 @@ jobs:
             docker rm myblazorapp || true
             docker run -d -p 8080:80 --name myblazorapp ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
 
-
       - name: Send success mail
         if: success()
         uses: dawidd6/action-send-mail@v3
