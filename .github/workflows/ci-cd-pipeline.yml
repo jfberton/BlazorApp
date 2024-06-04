@@ -49,6 +49,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           use_ssh_agent: true  # Add this line
+          debug: true
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
             docker stop myblazorapp || true
