@@ -42,6 +42,19 @@ jobs:
       - name: Push Docker image to Docker Hub
         run: docker push "${{ secrets.DOCKER_USERNAME }}"/myblazorapp:latest
 
+      - name: Deploy to local machine
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
+            docker stop myblazorapp || true
+            docker rm myblazorapp || true
+            docker run -d -p 8080:80 --name myblazorapp ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
+
       - name: Send success mail
         if: success()
         uses: dawidd6/action-send-mail@v3
