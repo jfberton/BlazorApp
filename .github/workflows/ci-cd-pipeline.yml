@@ -42,14 +42,19 @@ jobs:
       - name: Push Docker image to Docker Hub
         run: docker push "${{ secrets.DOCKER_USERNAME }}"/myblazorapp:latest
 
-      - name: Deploy to local machine
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+          ssh-known-hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Deploy to Local Server
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USER }}
-          use_ssh_agent: true 
-          debug: true 
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
             docker stop myblazorapp || true
