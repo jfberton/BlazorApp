@@ -31,5 +31,6 @@ jobs:
             docker stop myblazorapp || echo "No existe el contenedor myblazorapp"
             docker rm myblazorapp || echo "No existe el contenedor myblazorapp"
             docker image prune -f
+            echo "saldrá este comentario?"
             
            
