@@ -66,9 +66,9 @@ jobs:
             
             docker image prune -f
             
-            docker pull yourusername/myblazorapp:latest
+            docker pull "${{ secrets.DOCKER_USERNAME }}"/myblazorapp:latest
             
-            docker run -d -p 8080:80 --name myblazorapp yourusername/myblazorapp:latest
+            docker run -d -p 8080:80 --name myblazorapp "${{ secrets.DOCKER_USERNAME }}"/myblazorapp:latest
             
             timeout /t 10
             
