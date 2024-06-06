@@ -57,7 +57,7 @@ jobs:
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             # Detener el contenedor existente llamado myblazorapp, si existe
             docker stop myblazorapp || echo "No existe el contenedor myblazorapp"
