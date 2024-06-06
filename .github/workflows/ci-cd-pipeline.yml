@@ -64,6 +64,17 @@ jobs:
             docker stop myblazorapp || true
             docker rm myblazorapp || true
             docker run -d -p 8080:80 --name myblazorapp ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
+            
+            # Esperar un momento para permitir que el contenedor se inicie y luego verificar su estado
+            sleep 10
+            
+            # Verificar si el contenedor está corriendo
+            if [ "$(docker ps -q -f name=myblazorapp)" ]; then
+              echo "El contenedor myblazorapp está corriendo."
+            else
+              echo "El contenedor myblazorapp no está corriendo. Mostrando logs:"
+              docker logs myblazorapp
+            fi
 
       - name: Send success mail
         if: success()
@@ -74,7 +85,7 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Pipeline Succeeded: ${{ github.workflow }}"
-          body: "Exito!, la ultima version del app esta publicada correctamente en DockerHub."
+          body: "Exito! La última versión del app está publicada correctamente en DockerHub."
           to: ${{ secrets.TO_EMAIL }}
           from: ${{ secrets.FROM_EMAIL }}
 
@@ -87,6 +98,6 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Pipeline Failed: ${{ github.workflow }}"
-          body: "Error :( Ocurrio un error y no se pudo publicar el app, revisa la ejecucion para mas detalles"
+          body: "Error :( Ocurrió un error y no se pudo publicar el app, revisa la ejecución para más detalles."
           to: ${{ secrets.TO_EMAIL }}
           from: ${{ secrets.FROM_EMAIL }}
