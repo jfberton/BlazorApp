@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - otro  # Usar la rama master
+      - master  # Usar la rama master
 
 jobs:
   build:
@@ -22,16 +22,19 @@ jobs:
 
       - name: Deploy to Local Server
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          FOO: "BAR"
+          BAR: "FOO"
+          HOST: ${{ secrets.HOST }}
         with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          envs: FOO,BAR,SHA
           script: |
-            docker stop myblazorapp || echo "No existe el contenedor myblazorapp"
-            docker rm myblazorapp || echo "No existe el contenedor myblazorapp"
-            docker image prune -f
-            echo "saldrá este comentario?"
-            ls
-            
-           
+            echo "I am $FOO"
+            echo "I am $BAR"
+            echo "sha: $HOST"
+                
+               
