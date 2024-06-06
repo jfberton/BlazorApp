@@ -25,12 +25,12 @@ jobs:
         env:
           FOO: "BAR"
           BAR: "FOO"
-          HOST: ${{ secrets.HOST }}
+          HOST: ${{ secrets.SSH_HOST }}
         with:
-          host: ${{ secrets.HOST }}
+          host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
-          port: ${{ secrets.PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
           envs: FOO,BAR,SHA
           script: |
             echo "I am $FOO"
