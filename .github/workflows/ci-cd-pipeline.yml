@@ -52,31 +52,43 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
 
-      - name: Deploy to Local Server
+      - name: Deploy to local server via SSH
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          key: ${{ secrets.SSH_KEY }}
           script: |
-            docker stop myblazorapp || true
-            docker rm myblazorapp || true
+            # Detener el contenedor existente llamado myblazorapp, si existe
+            docker stop myblazorapp || echo "No existe el contenedor myblazorapp"
             
+            # Eliminar el contenedor existente llamado myblazorapp, si existe
+            docker rm myblazorapp || echo "No existe el contenedor myblazorapp"
+            
+            # Eliminar las imágenes dangling (sin etiquetas)
             docker image prune -f
-
-            docker pull ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
-
-            docker run -d -p 8080:80 --name myblazorapp ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
-
-            sleep 10
             
-            if [ "$(docker ps -q -f name=myblazorapp)" ]; then
-              echo "El contenedor myblazorapp está corriendo."
-            else
-              echo "El contenedor myblazorapp no está corriendo. Mostrando logs:"
+            # Descargar la última versión de la imagen myblazorapp desde el repositorio
+            docker pull yourusername/myblazorapp:latest
+            
+            # Ejecutar un nuevo contenedor con la imagen descargada, exponiendo el puerto 8080
+            docker run -d -p 8080:80 --name myblazorapp yourusername/myblazorapp:latest
+            
+            # Esperar 10 segundos para que el contenedor se inicie completamente
+            timeout /t 10
+            
+            # Asignar el ID del contenedor a la variable CONTAINER_ID si el contenedor está corriendo
+            FOR /F "tokens=*" %%i IN ('docker ps -q -f name=myblazorapp') DO set CONTAINER_ID=%%i
+            
+            # Verificar si la variable CONTAINER_ID está definida (lo que significa que el contenedor está corriendo)
+            IF DEFINED CONTAINER_ID (
+              # Si el contenedor está corriendo, imprimir un mensaje de éxito
+              echo El contenedor myblazorapp está corriendo.
+            ) ELSE (
+              # Si el contenedor no está corriendo, imprimir un mensaje de error y mostrar los logs del contenedor
+              echo El contenedor myblazorapp no está corriendo. Mostrando logs:
               docker logs myblazorapp
-            fi | tee deploy.log
+            )
             
       - name: Send success mail
         if: success()
