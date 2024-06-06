@@ -52,10 +52,11 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
 
-      - name: Deploy to local server via SSH
+      - name: Deploy to Local Server
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
