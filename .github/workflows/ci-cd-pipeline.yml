@@ -59,20 +59,14 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "Intento loguearme"
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-            echo "Me loguee"
-                        
             docker stop myblazorapp || echo "No existe el contenedor myblazorapp"
             docker rm myblazorapp || echo "No existe el contenedor myblazorapp"
             docker image prune -f
             docker pull ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
             docker run -d -p 8080:80 --name myblazorapp ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
-            
             timeout /t 10
-            
             FOR /F "tokens=*" %i IN ('docker ps -q -f name=myblazorapp') DO set CONTAINER_ID=%i
-            
             IF DEFINED CONTAINER_ID (
               echo El contenedor myblazorapp está corriendo.
             ) ELSE (
