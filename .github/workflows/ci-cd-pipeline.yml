@@ -60,8 +60,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "Usuario: ${{ secrets.DOCKER_USERNAME }}"
-            echo "Contraseña: ${{ secrets.DOCKER_PASSWORD }}"
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
             docker stop myblazorapp || echo "No existe el contenedor myblazorapp"
