@@ -82,8 +82,8 @@ jobs:
             else
               echo "El contenedor myblazorapp no está corriendo. Mostrando logs:"
               docker logs myblazorapp
-            fi
-
+            fi | tee deploy.log
+            
       - name: Send success mail
         if: success()
         uses: dawidd6/action-send-mail@v3
