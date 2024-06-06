@@ -60,15 +60,17 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            
             docker stop myblazorapp || echo "No existe el contenedor myblazorapp"
             
             docker rm myblazorapp || echo "No existe el contenedor myblazorapp"
             
             docker image prune -f
             
-            docker pull "${{ secrets.DOCKER_USERNAME }}"/myblazorapp:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
             
-            docker run -d -p 8080:80 --name myblazorapp "${{ secrets.DOCKER_USERNAME }}"/myblazorapp:latest
+            docker run -d -p 8080:80 --name myblazorapp ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
             
             timeout /t 10
             
