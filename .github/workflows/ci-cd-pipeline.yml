@@ -60,23 +60,17 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # Eliminar contenedores antiguos
             docker stop myblazorapp || true
             docker rm myblazorapp || true
             
-            # Limpiar imágenes no etiquetadas (dangling)
             docker image prune -f
 
-            # Descargar la última imagen
             docker pull ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
 
-            # Ejecutar el contenedor con la imagen latest
             docker run -d -p 8080:80 --name myblazorapp ${{ secrets.DOCKER_USERNAME }}/myblazorapp:latest
 
-            # Esperar un momento para permitir que el contenedor se inicie y luego verificar su estado
             sleep 10
             
-            # Verificar si el contenedor está corriendo
             if [ "$(docker ps -q -f name=myblazorapp)" ]; then
               echo "El contenedor myblazorapp está corriendo."
             else
