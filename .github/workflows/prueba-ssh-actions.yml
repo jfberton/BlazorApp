@@ -31,8 +31,6 @@ jobs:
             username: ${{ secrets.SSH_USERNAME }}
             key: ${{ secrets.SSH_PRIVATE_KEY }}
             script: |
-              echo "I am $FOO"
-              echo "I am $BAR"
-              echo "sha: $HOST"
+              whoami
                   
                
