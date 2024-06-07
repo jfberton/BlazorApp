@@ -23,15 +23,17 @@ jobs:
      - name: Deploy to Local Server
        uses: appleboy/ssh-action@v1.0.3
        env:
-            DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Avoid hardcoding in script
-            DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  # Optional, use token if available
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Avoid hardcoding in script
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  # Optional, use token if available
        with:
-            host: ${{ secrets.SSH_HOST }}
-            port: ${{ secrets.SSH_PORT }}
-            username: ${{ secrets.SSH_USERNAME }}
-            key: ${{ secrets.SSH_PRIVATE_KEY }}
-            script: |
-              echo "Hola"
-              whoami
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            docker stop myblazorapp || true
+            docker rm myblazorapp || true
+            docker image prune -f
                   
                
