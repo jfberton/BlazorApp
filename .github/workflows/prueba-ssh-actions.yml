@@ -31,9 +31,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-            docker stop myblazorapp || true
-            docker rm myblazorapp || true
-            docker image prune -f
+            whoami
                   
                
