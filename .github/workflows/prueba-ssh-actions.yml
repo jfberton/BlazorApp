@@ -34,8 +34,4 @@ jobs:
           script_stop: true
           script: |
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-            docker stop myblazorapp || echo "No existe el contenedor myblazorapp"
-            docker rm myblazorapp || echo "No existe el contenedor myblazorapp"
-            docker image prune -f
             docker pull "$DOCKER_USERNAME"/myblazorapp:latest
-            docker run -d -p 8080:80 --name myblazorapp "$DOCKER_USERNAME"/myblazorapp:latest
