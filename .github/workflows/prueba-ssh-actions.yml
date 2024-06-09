@@ -31,9 +31,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            docker pull $DOCKER_USERNAME/myblazorapp:latest
-            docker stop myblazorapp || true
-            docker rm myblazorapp || true
-            docker run -d -p 8080:80 --name myblazorapp $DOCKER_USERNAME/myblazorapp:latest
+            whoami
+            ls -al
 
                
