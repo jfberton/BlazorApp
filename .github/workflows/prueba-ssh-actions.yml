@@ -31,7 +31,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           envs: DOCKER_USERNAME, DOCKER_PASSWORD
-          script_stop: true
           script: |
             echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
             docker pull "$DOCKER_USERNAME"/myblazorapp:latest
