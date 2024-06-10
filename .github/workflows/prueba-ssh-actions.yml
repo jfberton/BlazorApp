@@ -22,12 +22,22 @@ jobs:
         
      - name: Deploy to Local Server
        uses: appleboy/ssh-action@v1.0.3
+       env:
+         DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-            powershell -File deploy_docker.ps1
-            Set-ExecutionPolicy -Scope Process -ExecutionPolicy Default
+         host: ${{ secrets.SSH_HOST }}
+         port: ${{ secrets.SSH_PORT }}
+         username: ${{ secrets.SSH_USERNAME }}
+         key: ${{ secrets.SSH_PRIVATE_KEY }}
+         envs: DOCKER_USERNAME, DOCKER_PASSWORD
+         script: |
+           powershell -Command "
+           echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin;
+           docker pull $DOCKER_USERNAME/myblazorapp:latest;
+           docker image prune -f;
+           if (docker ps -q -f name=myblazorapp_container) {
+             docker stop myblazorapp_container;
+             docker rm myblazorapp_container;
+           }
+           docker run -d -p 8080:80 --name myblazorapp_container $DOCKER_USERNAME/myblazorapp:latest;"
