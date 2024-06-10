@@ -27,5 +27,5 @@ jobs:
         port: ${{secrets.SSH_PORT}} # Remote server port -  Default: 22 - optional
         user: ${{secrets.SSH_USERNAME}} # Remote server user - required
         private_key: ${{secrets.SSH_PRIVATE_KEY}} # Private ssh key registered on the remote server - required
-        command: .\deplpoy_docker.ps1
+        command: ./deploy_docker.ps1
         
