@@ -23,7 +23,8 @@ jobs:
      - name: ls -a via ssh
        uses: garygrossgarten/github-action-ssh@release
        with:
-        command: deploy_docker.ps1
+        shell: pwsh
+        command: .\deploy_docker.ps1
         host: ${{ secrets.SSH_HOST }}
         port: ${{ secrets.SSH_PORT }}
         username: ${{ secrets.SSH_USERNAME }}
