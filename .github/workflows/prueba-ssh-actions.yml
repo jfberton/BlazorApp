@@ -20,16 +20,11 @@ jobs:
             mkdir -p ~/.ssh
             echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
             
-     - name: Deploy to Local Server
-       uses: JimCronqvist/action-ssh@master
-       env:
-          NAME: "Root"
+     - name: Deploy visa SSH
+       uses: D3rHase/ssh-command-action@v0.2.2
        with:
-          hosts: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          privateKey: ${{ secrets.SSH_PRIVATE_KEY }}
-          debug: false
-          shell: pwsh
-          command: |
-            ls -lah
-            echo "I am $NAME"
+        host: ${{secrets.SSH_HOST}} # Remote server address / ip - required
+        port: ${{secrets.SSH_PORT}} # Remote server port -  Default: 22 - optional
+        user: ${{secrets.SSH_USERNAME}} # Remote server user - required
+        private_key: ${{secrets.SSH_PRIVATE_KEY}} # Private ssh key registered on the remote server - required
+        command: echo 'hello world' # Command to be executed - Default: echo 'hello world' - optional
