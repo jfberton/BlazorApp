@@ -20,12 +20,38 @@ jobs:
             mkdir -p ~/.ssh
             echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
             
-     - name: ls -a via ssh
-       uses: garygrossgarten/github-action-ssh@release
+     - name: Deploy to Local Server
+       uses: appleboy/ssh-action@v1.0.3
+       env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Avoid hardcoding in script
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  # Optional, use token if available
        with:
-        shell: pwsh
-        command: .\deploy_docker.ps1
-        host: ${{ secrets.SSH_HOST }}
-        port: ${{ secrets.SSH_PORT }}
-        username: ${{ secrets.SSH_USERNAME }}
-        privateKey: ${{ secrets.SSH_PRIVATE_KEY}}
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          shell: pwsh
+          script_stop: true
+          envs: DOCKER_USERNAME, DOCKER_PASSWORD
+          script: |
+            echo "Intento loguearme"
+            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+            echo "Me loguee"
+    
+            docker stop myblazorapp || true
+            docker rm myblazorapp || true
+    
+            docker image prune -f
+    
+            docker pull $DOCKER_USERNAME/myblazorapp:latest
+    
+            docker run -d -p 8080:80 --name myblazorapp $DOCKER_USERNAME/myblazorapp:latest
+    
+            timeout /t 10
+    
+            if [[ $(docker ps -q -f name=myblazorapp) ]]; then
+              echo "El contenedor myblazorapp está corriendo."
+            else
+              echo "El contenedor myblazorapp no está corriendo. Mostrando logs:"
+              docker logs myblazorapp
+            fi
