@@ -28,4 +28,4 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            powershell -File /Downloads/deploy_docker.ps1
+            powershell -File deploy_docker.ps1
