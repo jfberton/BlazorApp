@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - hola  # Usar la rama master
+      - master  # Usar la rama master
 
 jobs:
   build:
@@ -52,14 +52,14 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
       
-      - name: Deploy to Local Server
-        uses: garygrossgarten/github-action-ssh@release
+      - name: Deploy visa SSH
+        uses: D3rHase/ssh-command-action@v0.2.2
         with:
-          command: powershell -File C:\Users\berton\deploy_docker.ps1
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USERNAME }}
-          privateKey: ${{ secrets.SSH_PRIVATE_KEY}}
+          host: ${{secrets.SSH_HOST}} # Remote server address / ip - required
+          port: ${{secrets.SSH_PORT}} # Remote server port -  Default: 22 - optional
+          user: ${{secrets.SSH_USERNAME}} # Remote server user - required
+          private_key: ${{secrets.SSH_PRIVATE_KEY}} # Private ssh key registered on the remote server - required
+          command: "powershell -File ./deploy_docker.ps1"
         
       - name: Send success mail
         if: success()
