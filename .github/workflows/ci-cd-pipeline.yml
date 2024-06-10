@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - hola  # Usar la rama master
+      - master  # Usar la rama master
 
 jobs:
   build:
@@ -53,29 +53,13 @@ jobs:
           echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
       
       - name: Deploy to Local Server
-        uses: appleboy/ssh-action@v1.0.3
-        env:
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}  # Avoid hardcoding in script
-          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}  # Optional, use token if available
+        uses: garygrossgarten/github-action-ssh@release
         with:
+          command: deploy_docker.ps1
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-            docker stop myblazorapp || true
-            docker rm myblazorapp || true
-            docker image prune -f
-            docker pull $DOCKER_USERNAME/myblazorapp:latest
-            docker run -d -p 8080:80 --name myblazorapp $DOCKER_USERNAME/myblazorapp:latest
-            timeout /t 10
-            if [[ $(docker ps -q -f name=myblazorapp) ]]; then
-              echo "El contenedor myblazorapp está corriendo."
-            else
-              echo "El contenedor myblazorapp no está corriendo. Mostrando logs:"
-              docker logs myblazorapp
-            fi
+          privateKey: ${{ secrets.SSH_PRIVATE_KEY}}
         
       - name: Send success mail
         if: success()
