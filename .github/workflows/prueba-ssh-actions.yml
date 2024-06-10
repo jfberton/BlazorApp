@@ -21,10 +21,12 @@ jobs:
             echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
             
      - name: Deploy to Local Server
-       uses: D3rHase/ssh-command-action@{version}
+       uses: Revaz333/ssh-action@master
        with:
-          host: ${{secrets.SSH_HOST}} # Remote server address / ip - required
-          port: ${{secrets.SSH_PORT}} # Remote server port -  Default: 22 - optional
-          user: ${{secrets.SSH_USERNAME}} # Remote server user - required
-          private_key: ${{secrets.PRIVATE_KEY}} # Private ssh key registered on the remote server - required
-          command: echo 'hello world' # Command to be executed - Default: echo 'hello world' - optional
+        command: |
+          cd .\Desktop\
+          ls -a
+        host: ${{ secrets.SSH_HOST }}
+        port: ${{ secrets.SSH_PORT }}
+        user: ${{ secrets.SSH_USERNAME }}
+        key: ${{ secrets.SSH_PRIVATE_KEY}}
