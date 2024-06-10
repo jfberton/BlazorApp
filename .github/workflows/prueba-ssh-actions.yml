@@ -19,6 +19,14 @@ jobs:
        run: |
             mkdir -p ~/.ssh
             echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+            
+     - name: ls -a via ssh
+       uses: garygrossgarten/github-action-ssh@release
+       with:
+        command: ls -a
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USERNAME }}
+        privateKey: ${{ secrets.SSH_PRIVATE_KEY}}
         
      - name: Deploy to Local Server
        uses: appleboy/ssh-action@v1.0.3
