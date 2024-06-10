@@ -3,35 +3,28 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - otro  # Usar la rama master
+      - hola  # Usar la rama master
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      - name: Add SSH Known Hosts
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
-
-      - name: Deploy to Local Server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            docker stop myblazorapp || echo "No existe el contenedor myblazorapp"
-            docker rm myblazorapp || echo "No existe el contenedor myblazorapp"
-            docker image prune -f
-            echo "saldrá este comentario?"
-            ls
+     - name: Setup SSH
+       uses: webfactory/ssh-agent@v0.5.3
+       with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+  
+     - name: Add SSH Known Hosts
+       run: |
+            mkdir -p ~/.ssh
+            echo "${{ secrets.SSH_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
             
-           
+     - name: ls -a via ssh
+       uses: garygrossgarten/github-action-ssh@release
+       with:
+        command: deploy_docker.ps1
+        host: ${{ secrets.SSH_HOST }}
+        port: ${{ secrets.SSH_PORT }}
+        username: ${{ secrets.SSH_USERNAME }}
+        privateKey: ${{ secrets.SSH_PRIVATE_KEY}}
