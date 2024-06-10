@@ -28,4 +28,6 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
             powershell -File deploy_docker.ps1
+            Set-ExecutionPolicy -Scope Process -ExecutionPolicy Default
