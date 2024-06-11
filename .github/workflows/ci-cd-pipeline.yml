@@ -27,6 +27,16 @@ jobs:
       - name: Run tests
         run: dotnet test --verbosity normal ./BlazorApp.Test/BlazorApp.Test.csproj  # Ruta correcta
 
+      - name: Run SonarQube analysis
+        env:
+         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+         sonar-scanner \
+           -Dsonar.projectKey=jfberton_BlazorApp \
+           -Dsonar.organization=jfberton \
+           -Dsonar.host.url=https://sonarcloud.io \
+           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
       - name: Publish the app
         run: dotnet publish --configuration Release --output ./publish ./BlazorApp.csproj  # Ruta correcta
 
