@@ -65,11 +65,14 @@ jobs:
         if: always()  # Ensure this step runs even if previous steps fail
         run: |
          SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}
-         STATUS="Success"
+         STATUS="exitoso :D"
          if [ "${{ job.status }}" != "success" ]; then
-           STATUS="Failed"
+           STATUS="Fallido :´("
          fi
-         MESSAGE="Deployment ${STATUS}: Job ${{ github.job }} in workflow ${{ github.workflow }} has completed with status ${{ job.status }}."
+         COMMIT_MESSAGE="${{ github.event.head_commit.message }}"
+         AUTHOR="${{ github.event.head_commit.author.name }}"
+         COMMIT_URL="${{ github.event.head_commit.url }}"
+         MESSAGE="Despliegue ${STATUS}: Tarea ${{ github.job }} en  workflow ${{ github.workflow }} se completo con estatus ${{ job.status }}.\nMensaje del commit: ${COMMIT_MESSAGE}\nAutor: ${AUTHOR}\nCommit URL: ${COMMIT_URL}"
          curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"${MESSAGE}\"}" $SLACK_WEBHOOK_URL
         
       - name: Send success mail
