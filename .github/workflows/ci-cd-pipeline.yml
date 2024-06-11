@@ -60,6 +60,17 @@ jobs:
           user: ${{secrets.SSH_USERNAME}} # Remote server user - required
           private_key: ${{secrets.SSH_PRIVATE_KEY}} # Private ssh key registered on the remote server - required
           command: "powershell -File ./deploy_docker.ps1"
+
+      - name: Send Slack notification
+        if: always()  # Ensure this step runs even if previous steps fail
+        run: |
+         SLACK_WEBHOOK_URL=${{ secrets.SLACK_WEBHOOK_URL }}
+         STATUS="Success"
+         if [ "${{ job.status }}" != "success" ]; then
+           STATUS="Failed"
+         fi
+         MESSAGE="Deployment ${STATUS}: Job ${{ github.job }} in workflow ${{ github.workflow }} has completed with status ${{ job.status }}."
+         curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"${MESSAGE}\"}" $SLACK_WEBHOOK_URL
         
       - name: Send success mail
         if: success()
