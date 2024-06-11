@@ -51,7 +51,9 @@ jobs:
          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
          JAVA_HOME: /opt/hostedtoolcache/Java_Adopt_jdk/17.0.11-9/x64
         run: |
-         export PATH=$(pwd)/sonar-scanner/bin:$PATH
+         export JAVA_HOME=/opt/hostedtoolcache/Java_Adopt_jdk/17.0.11-9/x64
+         export PATH=$JAVA_HOME/bin:$(pwd)/sonar-scanner/bin:$PATH
+         java -version
          sonar-scanner \
            -Dsonar.projectKey=my_project_key  \
            -Dsonar.organization=my_organization  \
