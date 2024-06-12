@@ -61,10 +61,10 @@ jobs:
           export JAVA_HOME=/opt/hostedtoolcache/Java_Adopt_jdk/17.0.11-9/x64
           export PATH=$JAVA_HOME/bin:$(pwd)/sonar-scanner/bin:$PATH
           sonar-scanner \
-           -Dsonar.projectKey=my_project_key  \
-           -Dsonar.organization=my_organization  \
-           -Dsonar.host.url=https://sonarcloud.io \
-           -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.projectKey=my_project_key  \
+            -Dsonar.organization=my_organization  \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: Publish the app
         run: dotnet publish --configuration Release --output ./publish ./BlazorApp.csproj  # Ruta correcta
