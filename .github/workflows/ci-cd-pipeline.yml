@@ -28,7 +28,7 @@ jobs:
         run: dotnet test --verbosity normal ./BlazorApp.Test/BlazorApp.Test.csproj  # Ruta correcta
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
           java-version: '17'
