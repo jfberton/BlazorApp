@@ -43,13 +43,13 @@ jobs:
         run: |
           curl -sSLo sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
           unzip sonar-scanner.zip
-          echo "$(pwd)/sonar-scanner-4.6.2.2472-linux/bin" >> $GITHUB_PATH
           mv sonar-scanner-4.6.2.2472-linux sonar-scanner
+          echo "$(pwd)/sonar-scanner/bin" >> $GITHUB_PATH
 
       - name: Ensure Java 17 is used by SonarScanner
         run: |
           export JAVA_HOME=/opt/hostedtoolcache/Java_Adopt_jdk/17.0.11-9/x64
-          export PATH=$JAVA_HOME/bin:$(pwd)/sonar-scanner/bin:$PATH
+          export PATH=$JAVA_HOME/bin:$PATH
           java -version
 
       - name: Run SonarCloud analysis
