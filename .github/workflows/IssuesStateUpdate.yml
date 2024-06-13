@@ -1,26 +1,26 @@
-name: Update state issue
+name: Mover Tarea a Columna Específica en Proyecto de Usuario
 
 on:
   push:
     branches:
-      - master  
+      - main
 
 jobs:
-  build:
+  move_task:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3  # Actualizado a v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Mover tarea al hacer commit
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const taskRegex = /#(\d+)/; // Regex para identificar el número de tarea
             const commitMessage = github.context.payload.commits[0].message;
             const taskNumberMatch = commitMessage.match(taskRegex);
-            
+
             if (taskNumberMatch) {
               const taskNumber = taskNumberMatch[1];
               const projectName = 'Super proyecto'; // Reemplaza con el nombre de tu proyecto
@@ -30,7 +30,8 @@ jobs:
               const projectIdQuery = `
                 query ($login: String!, $projectName: String!) {
                   user(login: $login) {
-                    projectNext(number: 2) { 
+                    projectNext(number: 2) {
+                      id
                     }
                   }
                 }
@@ -50,7 +51,7 @@ jobs:
                   updateProjectNextItemField(input: {
                     projectId: $projectId,
                     itemId: $taskNumber,
-                    fieldId: "status", # 'status' es el ID de las columnas del kanban en el proyecto
+                    fieldId: "status", # 'status' es el ID de las columnas en el proyecto
                     value: $columnName
                   }) {
                     projectNextItem {
@@ -67,4 +68,3 @@ jobs:
                 columnName: columnName
               });
             }
-          github-token: ${{ secrets.MY_OTHER_PAT }}
