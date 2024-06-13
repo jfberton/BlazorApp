@@ -105,9 +105,9 @@ jobs:
       - name: Install octokit/core module
         run: npm install @octokit/core
 
-      - name: Create updateIssue.js script
+      - name: Create updateIssue.mjs script
         run: |
-          echo 'const { Octokit } = require("@octokit/core");
+          echo 'import { Octokit } from "@octokit/core";
           const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
           async function updateIssue() {
@@ -139,7 +139,7 @@ jobs:
           updateIssue().catch(err => {
             console.error(err);
             process.exit(1);
-          });' > updateIssue.js
+          });' > updateIssue.mjs
 
       - name: Update issue status
         if: steps.extract-issue-number.outputs.issue_number != ''
