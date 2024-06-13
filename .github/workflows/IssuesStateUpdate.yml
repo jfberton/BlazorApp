@@ -3,7 +3,7 @@ name: Update state issue
 on:
   push:
     branches:
-      - master  # Usar la rama master
+      - master  
 
 jobs:
   build:
