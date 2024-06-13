@@ -23,7 +23,7 @@ jobs:
       - name: Install Node.js (updated version)
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  # Or any version 18 or higher
+          node-version: '18'  # Or any versión 18 or higher
 
       - name: Install octokit/core module
         run: npm install @octokit/core
@@ -34,6 +34,8 @@ jobs:
       - name: Create updateIssue.mjs script
         run: |
           echo "import { Octokit } from '@octokit/core';
+          import fetch from 'node-fetch';
+
           const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
           async function updateIssue() {
@@ -55,7 +57,6 @@ jobs:
               throw new Error(`Column ${column_name} not found`);
             }
 
-            const fetch = require('node-fetch');  # Use imported fetch (optional)
             const response = await octokit.request('POST /projects/columns/\${column.id}/cards', {
               column_id: column.id,
               content_id: issueNumber,
@@ -78,3 +79,4 @@ jobs:
         run: |
           ISSUE_NUMBER="${{ steps.extract-issue-number.outputs.issue_number }}"
           node --experimental-modules /home/runner/work/BlazorApp/BlazorApp/updateIssue.mjs
+          
