@@ -27,6 +27,7 @@ jobs:
             const issue_number = parseInt("${{ steps.extract_issue_number.outputs.issue_number }}", 10);
             const project_name = 'Super proyecto'; // Reemplaza con el nombre de tu proyecto
             const column_name = 'In review'; // Reemplaza con el nombre de la columna deseada
+
             // Consulta GraphQL para obtener el ID del proyecto
             const projectIdQuery = `
               query ($login: String!) {
@@ -37,11 +38,14 @@ jobs:
                 }
               }
             `;
+
             // Ejecutar la consulta GraphQL para obtener el ID del proyecto
             const projectIdResponse = await github.graphql(projectIdQuery, {
-              login: github.context.repo.owner, // Tu nombre de usuario de GitHub
+              login: context.repo.owner // Tu nombre de usuario de GitHub
             });
+
             const projectId = projectIdResponse.user.projectNext.id;
+
             // Consulta GraphQL para mover el issue
             const moveIssueMutation = `
               mutation ($projectId: ID!, $issueId: ID!, $columnName: String!) {
@@ -57,6 +61,7 @@ jobs:
                 }
               }
             `;
+
             // Ejecutar la mutación GraphQL para mover el issue
             await github.graphql(moveIssueMutation, {
               projectId: projectId,
