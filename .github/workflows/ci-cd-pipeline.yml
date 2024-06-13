@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - notthemaster  # Usar la rama master
+      - master  # Usar la rama master
 
 jobs:
   build:
