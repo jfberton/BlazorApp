@@ -3,7 +3,7 @@ name: Mover Tarea a Columna Específica en Proyecto de Usuario
 on:
   push:
     branches:
-      - master
+      - notthemaster
 
 jobs:
   move_issue:
@@ -30,7 +30,7 @@ jobs:
 
             // Consulta GraphQL para obtener el ID del proyecto
             const projectIdQuery = `
-              query ($login: String!, $projectName: String!) {
+              query ($login: String!) {
                 user(login: $login) {
                   projectsV2(first: 100) {
                     nodes {
@@ -44,8 +44,7 @@ jobs:
 
             // Ejecutar la consulta GraphQL para obtener el ID del proyecto
             const projectIdResponse = await github.graphql(projectIdQuery, {
-              login: context.repo.owner,
-              projectName: project_name
+              login: context.repo.owner
             });
 
             const project = projectIdResponse.user.projectsV2.nodes.find(project => project.title === project_name);
