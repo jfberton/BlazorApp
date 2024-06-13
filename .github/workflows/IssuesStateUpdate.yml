@@ -6,65 +6,56 @@ on:
       - master
 
 jobs:
-  move_task:
+  move_issue:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Mover tarea al hacer commit
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      - name: Mover issue al cambiar label
         uses: actions/github-script@v6
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            if (!github.context.payload || !github.context.payload.commits || github.context.payload.commits.length === 0) {
-              console.log('No hay commits en el payload, no se puede continuar.');
-              return;
-            }
-            
-            const taskRegex = /#(\d+)/; // Regex para identificar el número de tarea
-            const commitMessage = github.context.payload.commits[0].message;
-            const taskNumberMatch = commitMessage.match(taskRegex);
-            if (taskNumberMatch) {
-              const taskNumber = taskNumberMatch[1];
-              const projectName = 'Super proyecto'; // Reemplaza con el nombre de tu proyecto
-              const columnName = 'In review'; // Reemplaza con el nombre de la columna deseada
-              // Consulta GraphQL para obtener el ID del proyecto
-              const projectIdQuery = `
-                query ($login: String!, $projectName: String!) {
-                  user(login: $login) {
-                    projectNext(number: 2) {
-                      id
-                    }
+            const github = require('@actions/github');
+            const issue_number = github.context.issue.number;
+            const project_name = 'Super proyecto'; // Reemplaza con el nombre de tu proyecto
+            const column_name = 'In review'; // Reemplaza con el nombre de la columna deseada
+
+            // Consulta GraphQL para obtener el ID del proyecto
+            const projectIdQuery = `
+              query ($login: String!) {
+                user(login: $login) {
+                  projectNext(number: 2) { 
+                    id
                   }
                 }
-              `;
-              // Ejecutar la consulta GraphQL para obtener el ID del proyecto
-              const projectIdResponse = await github.graphql(projectIdQuery, {
-                login: github.context.repo.owner,
-                projectName: projectName
-              });
-              const projectId = projectIdResponse.user.projectNext.id;
-              // Consulta GraphQL para mover la tarea
-              const moveTaskMutation = `
-                mutation ($projectId: ID!, $taskNumber: Int!, $columnName: String!) {
-                  updateProjectNextItemField(input: {
-                    projectId: $projectId,
-                    itemId: $taskNumber,
-                    fieldId: "status", // 'status' es el ID de las columnas en el proyecto
-                    value: $columnName
-                  }) {
-                    projectNextItem {
-                      id
-                    }
+              }
+            `;
+
+            // Ejecutar la consulta GraphQL para obtener el ID del proyecto
+            const projectIdResponse = await github.graphql(projectIdQuery, {
+              login: github.context.repo.owner, // Tu nombre de usuario de GitHub
+            });
+
+            const projectId = projectIdResponse.user.projectNext.id;
+
+            // Consulta GraphQL para mover el issue
+            const moveIssueMutation = `
+              mutation ($projectId: ID!, $issueId: ID!, $columnName: String!) {
+                updateProjectNextItemField(input: {
+                  projectId: $projectId,
+                  itemId: $issueId,
+                  fieldId: "status", 
+                  value: $columnName
+                }) {
+                  projectNextItem {
+                    id
                   }
                 }
-              `;
-              // Ejecutar la mutación GraphQL para mover la tarea
-              await github.graphql(moveTaskMutation, {
-                projectId: projectId,
-                taskNumber: parseInt(taskNumber),
-                columnName: columnName
-              });
-            }
+              }
+            `;
+
+            // Ejecutar la mutación GraphQL para mover el issue
+            await github.graphql(moveIssueMutation, {
+              projectId: projectId,
+              issueId: issue_number,
+              columnName: column_name
+            });
+          github-token: ${{ secrets.GITHUB_TOKEN }}
