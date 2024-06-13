@@ -3,7 +3,7 @@ name: Mover Tarea a Columna Específica en Proyecto de Usuario
 on:
   push:
     branches:
-      - master
+      - notthemaster
 
 jobs:
   move_issue:
@@ -30,10 +30,13 @@ jobs:
 
             // Consulta GraphQL para obtener el ID del proyecto
             const projectIdQuery = `
-              query ($login: String!) {
+              query ($login: String!, $projectName: String!) {
                 user(login: $login) {
-                  projectNext(number: 2) { 
-                    id
+                  projectsV2(first: 100) {
+                    nodes {
+                      id
+                      title
+                    }
                   }
                 }
               }
@@ -41,21 +44,65 @@ jobs:
 
             // Ejecutar la consulta GraphQL para obtener el ID del proyecto
             const projectIdResponse = await github.graphql(projectIdQuery, {
-              login: context.repo.owner // Tu nombre de usuario de GitHub
+              login: context.repo.owner,
+              projectName: project_name
             });
 
-            const projectId = projectIdResponse.user.projectNext.id;
+            const project = projectIdResponse.user.projectsV2.nodes.find(project => project.title === project_name);
+            if (!project) {
+              throw new Error(`Project '${project_name}' not found`);
+            }
+            const projectId = project.id;
+
+            // Consulta GraphQL para obtener las columnas del proyecto
+            const columnsQuery = `
+              query ($projectId: ID!) {
+                node(id: $projectId) {
+                  ... on ProjectV2 {
+                    fields(first: 100) {
+                      nodes {
+                        ... on ProjectV2SingleSelectField {
+                          id
+                          options {
+                            id
+                            name
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `;
+
+            // Ejecutar la consulta GraphQL para obtener las columnas del proyecto
+            const columnsResponse = await github.graphql(columnsQuery, {
+              projectId: projectId
+            });
+
+            const column = columnsResponse.node.fields.nodes
+              .filter(field => field.options)
+              .flatMap(field => field.options)
+              .find(option => option.name === column_name);
+
+            if (!column) {
+              throw new Error(`Column '${column_name}' not found in project '${project_name}'`);
+            }
+
+            const columnId = column.id;
 
             // Consulta GraphQL para mover el issue
             const moveIssueMutation = `
-              mutation ($projectId: ID!, $issueId: ID!, $columnName: String!) {
-                updateProjectNextItemField(input: {
+              mutation ($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: ID!) {
+                updateProjectV2ItemFieldValue(input: {
                   projectId: $projectId,
-                  itemId: $issueId,
-                  fieldId: "status", 
-                  value: $columnName
+                  itemId: $itemId,
+                  fieldId: $fieldId,
+                  value: {
+                    singleSelectOptionId: $optionId
+                  }
                 }) {
-                  projectNextItem {
+                  projectV2Item {
                     id
                   }
                 }
@@ -65,7 +112,8 @@ jobs:
             // Ejecutar la mutación GraphQL para mover el issue
             await github.graphql(moveIssueMutation, {
               projectId: projectId,
-              issueId: issue_number,
-              columnName: column_name
+              itemId: issue_number,
+              fieldId: columnId,
+              optionId: columnId
             });
           github-token: ${{ secrets.GITHUB_TOKEN }}
