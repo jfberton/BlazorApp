@@ -36,7 +36,7 @@ jobs:
           echo "import { Octokit } from '@octokit/core';
           import fetch from 'node-fetch';
 
-          const octokit = new Octokit({ auth: process.env.PERSONAL_ACCESS_TOKEN });
+          const octokit = new Octokit({ auth: process.env.PAT });
 
           async function updateIssue() {
             const project_name = 'Mi super proyecto para Ing. de Software';
@@ -84,7 +84,7 @@ jobs:
         if: steps.extract-issue-number.outputs.issue_number != ''
         run: |
           ISSUE_NUMBER="${{ steps.extract-issue-number.outputs.issue_number }}"
-          PERSONAL_ACCESS_TOKEN="${{ secrets.MI_PAT }}"
+          PAT="${{ secrets.MY_OTHER_PAT }}"
           GITHUB_REPOSITORY="${{ github.repository }}"
           
           node --experimental-modules /home/runner/work/BlazorApp/BlazorApp/updateIssue.mjs
