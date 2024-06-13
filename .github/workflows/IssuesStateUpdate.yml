@@ -28,10 +28,7 @@ jobs:
       - name: Install octokit/core module
         run: npm install @octokit/core
 
-      - name: Install node-fetch (optional, but recommended for Node.js v16)
-        run: npm install node-fetch  # This step is new
-
-      - name: Create updateIssue.mjs script
+      - name: Crear script updateIssue.mjs
         run: |
           echo "import { Octokit } from '@octokit/core';
           import fetch from 'node-fetch';
@@ -42,19 +39,21 @@ jobs:
             const project_name = 'Mi super proyecto para Ing. de Software';
             const column_name = 'In review';
             const issueNumber = process.env.ISSUE_NUMBER;
+            const owner = process.env.GITHUB_REPOSITORY_OWNER;
+            const repo = process.env.GITHUB_REPOSITORY;
 
-            const projects = await octokit.request('GET /repos/{{ github.repository_owner }}/{{ github.repository }}/projects');
+            const projects = await octokit.request(\`GET /repos/\${owner}/\${repo}/projects\`);
             const project = projects.data.find(proj => proj.name === project_name);
 
             if (!project) {
-              throw new Error(`Project ${project_name} not found`);
+              throw new Error(\`Proyecto \${project_name} no encontrado\`);
             }
 
             const columns = await octokit.request(\`GET /projects/\${project.id}/columns\`);
             const column = columns.data.find(col => col.name === column_name);
 
             if (!column) {
-              throw new Error(`Column ${column_name} not found`);
+              throw new Error(\`Columna \${column_name} no encontrada\`);
             }
 
             const response = await octokit.request('POST /projects/columns/\${column.id}/cards', {
@@ -64,7 +63,7 @@ jobs:
               request: { fetch },
             });
 
-            console.log('Issue updated successfully:', response.data);
+            console.log('Estado del issue actualizado exitosamente:', response.data);
           }
 
           updateIssue().catch(err => {
@@ -74,9 +73,12 @@ jobs:
 
           export { updateIssue };" > /home/runner/work/BlazorApp/BlazorApp/updateIssue.mjs
 
-      - name: Update issue status
+      - name: Actualizar estado del issue
         if: steps.extract-issue-number.outputs.issue_number != ''
         run: |
           ISSUE_NUMBER="${{ steps.extract-issue-number.outputs.issue_number }}"
+          GITHUB_REPOSITORY_OWNER="${{ github.repository_owner }}"
+          GITHUB_REPOSITORY="${{ github.repository }}"
           node --experimental-modules /home/runner/work/BlazorApp/BlazorApp/updateIssue.mjs
-          
+
+      
