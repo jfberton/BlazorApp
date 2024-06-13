@@ -18,7 +18,7 @@ jobs:
           COMMIT_MESSAGE=$(git log -1 --pretty=%B)
           ISSUE_NUMBER=$(echo "$COMMIT_MESSAGE" | grep -oE '#[0-9]+' | tr -d '#')
           echo "::set-output name=issue_number::$ISSUE_NUMBER"
-        
+
       - name: Mover issue al cambiar label
         if: steps.extract_issue_number.outputs.issue_number
         uses: actions/github-script@v6
@@ -28,7 +28,7 @@ jobs:
             const project_name = 'Super proyecto'; // Reemplaza con el nombre de tu proyecto
             const column_name = 'In review'; // Reemplaza con el nombre de la columna deseada
 
-            // Consulta GraphQL para obtener el ID del proyecto
+            // Consulta GraphQL para obtener el ID del proyecto del usuario
             const projectIdQuery = `
               query ($login: String!) {
                 user(login: $login) {
@@ -42,9 +42,9 @@ jobs:
               }
             `;
 
-            // Ejecutar la consulta GraphQL para obtener el ID del proyecto
+            // Ejecutar la consulta GraphQL para obtener el ID del proyecto del usuario
             const projectIdResponse = await github.graphql(projectIdQuery, {
-              login: context.repo.owner
+              login: 'jfberton' // Reemplaza con el nombre del usuario del proyecto
             });
 
             const project = projectIdResponse.user.projectsV2.nodes.find(project => project.title === project_name);
