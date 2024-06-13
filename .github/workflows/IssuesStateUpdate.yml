@@ -70,7 +70,7 @@ jobs:
               });
               
               export { updateIssue };" > /home/runner/work/BlazorApp/BlazorApp/updateIssue.mjs
-
+      #un cambio
       - name: Update issue status
         if: steps.extract-issue-number.outputs.issue_number != ''
         run: |
