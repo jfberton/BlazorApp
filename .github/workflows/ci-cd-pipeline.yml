@@ -107,40 +107,40 @@ jobs:
 
       - name: Create updateIssue.js script
         run: |
-          echo "const { Octokit } = require('@octokit/core');
+          echo 'const { Octokit } = require("@octokit/core");
           const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-  
+
           async function updateIssue() {
-            const project_name = 'TuNombreDeProyecto';
-            const column_name = 'In Review';
+            const project_name = "Mi super proyecto para Ing. de Software";
+            const column_name = "In review";
             const issueNumber = process.env.ISSUE_NUMBER;
-  
-            const projects = await octokit.request('GET /repos/${{ github.repository_owner }}/${{ github.repository }}/projects');
+
+            const projects = await octokit.request("GET /repos/${{ github.repository_owner }}/${{ github.repository }}/projects");
             const project = projects.data.find(proj => proj.name === project_name);
-  
+
             if (!project) {
-              throw new Error(\`Project \${project_name} not found\`);
+              throw new Error(`Project ${project_name} not found`);
             }
-  
-            const columns = await octokit.request(\`GET /projects/\${project.id}/columns\`);
+
+            const columns = await octokit.request(`GET /projects/${project.id}/columns`);
             const column = columns.data.find(col => col.name === column_name);
-  
+
             if (!column) {
-              throw new Error(\`Column \${column_name} not found\`);
+              throw new Error(`Column ${column_name} not found`);
             }
-  
-            await octokit.request('POST /projects/columns/${column.id}/cards', {
+
+            await octokit.request("POST /projects/columns/${column.id}/cards", {
               column_id: column.id,
               content_id: issueNumber,
-              content_type: 'Issue'
+              content_type: "Issue"
             });
           }
-  
+
           updateIssue().catch(err => {
             console.error(err);
             process.exit(1);
-          });" > updateIssue.js
-  
+          });' > updateIssue.js
+
       - name: Update issue status
         if: steps.extract-issue-number.outputs.issue_number != ''
         run: |
