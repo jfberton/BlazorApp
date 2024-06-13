@@ -13,7 +13,6 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const github = require('@actions/github');
             const issue_number = github.context.issue.number;
             const project_name = 'Super proyecto'; // Reemplaza con el nombre de tu proyecto
             const column_name = 'In review'; // Reemplaza con el nombre de la columna deseada
