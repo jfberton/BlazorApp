@@ -139,12 +139,12 @@ jobs:
           updateIssue().catch(err => {
             console.error(err);
             process.exit(1);
-          });' > updateIssue.js
+          });' > /home/runner/work/BlazorApp/BlazorApp/updateIssue.js
 
       - name: Update issue status
         if: steps.extract-issue-number.outputs.issue_number != ''
         run: |
-          ISSUE_NUMBER="${{ steps.extract-issue-number.outputs.issue_number }}" node ./BlazorApp/updateIssue.js
+          ISSUE_NUMBER="${{ steps.extract-issue-number.outputs.issue_number }}" node /home/runner/work/BlazorApp/BlazorApp/updateIssue.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
