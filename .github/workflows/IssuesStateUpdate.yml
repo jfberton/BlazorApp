@@ -16,48 +16,55 @@ jobs:
       - name: Mover tarea al hacer commit
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.MY_OTHER_PAT}}
           script: |
-            const projectName = 'Super proyecto'; 
-            const columnName = 'In review'; 
             const taskRegex = /#(\d+)/; // Regex para identificar el número de tarea
-            // Obtener el mensaje del commit
-            const commitMessage = context.payload.commits[0].message;
+            const commitMessage = github.context.payload.commits[0].message;
             const taskNumberMatch = commitMessage.match(taskRegex);
+            
             if (taskNumberMatch) {
               const taskNumber = taskNumberMatch[1];
-              // Obtener todos los proyectos
-              const projects = await github.rest.projects.listForRepo({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
+              const projectName = 'Super proyecto'; // Reemplaza con el nombre de tu proyecto
+              const columnName = 'In review'; // Reemplaza con el nombre de la columna deseada
+
+              // Consulta GraphQL para obtener el ID del proyecto
+              const projectIdQuery = `
+                query ($login: String!, $projectName: String!) {
+                  user(login: $login) {
+                    projectNext(number: 2) { 
+                    }
+                  }
+                }
+              `;
+
+              // Ejecutar la consulta GraphQL para obtener el ID del proyecto
+              const projectIdResponse = await github.graphql(projectIdQuery, {
+                login: github.context.repo.owner,
+                projectName: projectName
               });
-              // Encontrar el proyecto específico
-              const project = projects.data.find(p => p.name === projectName);
-              if (!project) {
-                throw new Error(`Proyecto '${projectName}' no encontrado.`);
-              }
-              // Obtener las columnas del proyecto
-              const columns = await github.rest.projects.listColumns({
-                project_id: project.id,
-              });
-              // Encontrar la columna específica
-              const column = columns.data.find(c => c.name === columnName);
-              if (!column) {
-                throw new Error(`Columna '${columnName}' no encontrada.`);
-              }
-              // Obtener las tarjetas de la columna actual del issue
-              const cards = await github.rest.projects.listCards({
-                column_id: column.id,
-              });
-              // Encontrar la tarjeta específica del issue
-              const card = cards.data.find(card => card.content_url.endsWith(taskNumber));
-              if (!card) {
-                throw new Error(`Tarjeta del issue #${taskNumber} no encontrada en la columna actual.`);
-              }
-              // Mover la tarjeta a la columna deseada
-              await github.rest.projects.moveCard({
-                card_id: card.id,
-                position: 'top',
-                column_id: column.id,
+
+              const projectId = projectIdResponse.user.projectNext.id;
+
+              // Consulta GraphQL para mover la tarea
+              const moveTaskMutation = `
+                mutation ($projectId: ID!, $taskNumber: Int!, $columnName: String!) {
+                  updateProjectNextItemField(input: {
+                    projectId: $projectId,
+                    itemId: $taskNumber,
+                    fieldId: "status", # 'status' es el ID de las columnas del kanban en el proyecto
+                    value: $columnName
+                  }) {
+                    projectNextItem {
+                      id
+                    }
+                  }
+                }
+              `;
+
+              // Ejecutar la mutación GraphQL para mover la tarea
+              await github.graphql(moveTaskMutation, {
+                projectId: projectId,
+                taskNumber: parseInt(taskNumber),
+                columnName: columnName
               });
             }
+          github-token: ${{ secrets.MY_OTHER_PAT }}
