@@ -46,27 +46,27 @@ jobs:
             
             const octokit = new Octokit({
               auth: {
-                token: pat,
+                token: '${path}',
                 tokenType: 'oauth',
               },
             });
 
-            console.log(`Owner: ${owner}`);
-            console.log(`Repository: ${repo}`);
-            console.log(`Issue Number: ${issueNumber}`);
+            console.log('Owner: ${owner}');
+            console.log('Repository: ${repo}');
+            console.log('Issue Number: ${issueNumber}');
 
-            const projects = await octokit.request(\`GET /repos/\${repo}/projects\`);
+            const projects = await octokit.request(\'GET /repos/\${repo}/projects\');
             const project = projects.data.find(proj => proj.name === project_name);
 
             if (!project) {
-              throw new Error(\`Proyecto \${project_name} no encontrado\`);
+              throw new Error(\'Proyecto \${project_name} no encontrado\');
             }
 
-            const columns = await octokit.request(\`GET /projects/\${project.id}/columns\`);
+            const columns = await octokit.request(\'GET /projects/\${project.id}/columns\');
             const column = columns.data.find(col => col.name === column_name);
 
             if (!column) {
-              throw new Error(\`Columna \${column_name} no encontrada\`);
+              throw new Error(\'Columna \${column_name} no encontrada\');
             }
 
             const response = await octokit.request('POST /projects/columns/\${column.id}/cards', {
