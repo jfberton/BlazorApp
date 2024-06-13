@@ -36,19 +36,20 @@ jobs:
           echo "import { Octokit } from '@octokit/core';
           import fetch from 'node-fetch';
 
-          const octokit = new Octokit({
-            auth: {
-              token: process.env.PAT,
-              tokenType: 'oauth',
-            },
-          });
-
           async function updateIssue() {
             const project_name = 'Mi super proyecto para Ing. de Software';
             const column_name = 'In review';
             const issueNumber = process.env.ISSUE_NUMBER;
             const owner = process.env.GITHUB_REPOSITORY_OWNER;
             const repo = process.env.GITHUB_REPOSITORY;
+            const pat = process.env.PAT;
+            
+            const octokit = new Octokit({
+              auth: {
+                token: pat,
+                tokenType: 'oauth',
+              },
+            });
 
             console.log(`Owner: ${owner}`);
             console.log(`Repository: ${repo}`);
@@ -89,7 +90,7 @@ jobs:
         if: steps.extract-issue-number.outputs.issue_number != ''
         run: |
           ISSUE_NUMBER="${{ steps.extract-issue-number.outputs.issue_number }}"
-          PAT="${{ secrets.MI_PAT }}"
+          PAT="${{ secrets.MY_OTHER_PAT }}"
           GITHUB_REPOSITORY="${{ github.repository }}"
           
           node --experimental-modules /home/runner/work/BlazorApp/BlazorApp/updateIssue.mjs
