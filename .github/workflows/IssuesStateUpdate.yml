@@ -84,7 +84,7 @@ jobs:
         if: steps.extract-issue-number.outputs.issue_number != ''
         run: |
           ISSUE_NUMBER="${{ steps.extract-issue-number.outputs.issue_number }}"
-          PAT="${{ secrets.MY_OTHER_PAT }}"
+          PAT="${{ secrets.MI_PAT }}"
           GITHUB_REPOSITORY="${{ github.repository }}"
           
           node --experimental-modules /home/runner/work/BlazorApp/BlazorApp/updateIssue.mjs
