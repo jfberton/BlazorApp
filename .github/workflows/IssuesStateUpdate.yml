@@ -45,6 +45,10 @@ jobs:
             const owner = process.env.GITHUB_REPOSITORY_OWNER;
             const repo = process.env.GITHUB_REPOSITORY;
 
+            console.log(`Owner: ${owner}`);
+            console.log(`Repository: ${repo}`);
+            console.log(`Issue Number: ${issueNumber}`);
+
             const projects = await octokit.request(\`GET /repos/\${owner}/\${repo}/projects\`);
             const project = projects.data.find(proj => proj.name === project_name);
 
