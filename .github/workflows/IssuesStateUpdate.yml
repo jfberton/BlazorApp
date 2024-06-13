@@ -28,6 +28,9 @@ jobs:
       - name: Install octokit/core module
         run: npm install @octokit/core
 
+      - name: Install node-fetch (opcional, pero recomendado para Node.js v16)
+        run: npm install node-fetch  # Este paso es nuevo
+
       - name: Crear script updateIssue.mjs
         run: |
           echo "import { Octokit } from '@octokit/core';
