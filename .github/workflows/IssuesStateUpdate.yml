@@ -3,7 +3,7 @@ name: Mover Tarea a Columna Específica en Proyecto de Usuario
 on:
   push:
     branches:
-      - master #rama
+      - notthemaster #rama
 
 jobs:
   move_issue:
