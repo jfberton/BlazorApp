@@ -97,49 +97,54 @@ jobs:
           issue_number=$(echo "$commit_message" | grep -oP '#\d+' | grep -oP '\d+' | head -1 || echo "")
           echo "::set-output name=issue_number::$issue_number"
       
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Version compatible de Node.js
+
+      - name: Install octokit/core module
+        run: npm install @octokit/core
+
       - name: Update issue status
         if: steps.extract-issue-number.outputs.issue_number != ''
-        uses: actions/github-script@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const issueNumber = '${{ steps.extract-issue-number.outputs.issue_number }}';
-            const project_name = 'Mi super proyecto para Ing. de Software';
-            const column_name = 'In review';
-      
-            const { Octokit } = require('@octokit/core');
-            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-      
-            // Get project ID
-            const { data: projects } = await octokit.request('GET /repos/{owner}/{repo}/projects', {
-              owner: context.repo.owner,
-              repo: context.repo.repo
-            });
-      
-            const project = projects.find(proj => proj.name === project_name);
-      
+        run: |
+          issueNumber="${{ steps.extract-issue-number.outputs.issue_number }}"
+          project_name="Mi super proyecto para Ing. de Software"
+          column_name="In review"
+
+          node <<EOF
+          const { Octokit } = require("@octokit/core");
+          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+          async function updateIssue() {
+            const projects = await octokit.request('GET /repos/${{ github.repository_owner }}/${{ github.repository }}/projects');
+            const project = projects.data.find(proj => proj.name === project_name);
+
             if (!project) {
               throw new Error(`Project ${project_name} not found`);
             }
-      
-            // Get column ID
-            const { data: columns } = await octokit.request('GET /projects/{project_id}/columns', {
-              project_id: project.id
-            });
-      
-            const column = columns.find(col => col.name === column_name);
-      
+
+            const columns = await octokit.request('GET /projects/${project.id}/columns');
+            const column = columns.data.find(col => col.name === column_name);
+
             if (!column) {
               throw new Error(`Column ${column_name} not found`);
             }
-      
-            // Move issue to the column
-            await octokit.request('POST /projects/columns/{column_id}/cards', {
+
+            await octokit.request('POST /projects/columns/${column.id}/cards', {
               column_id: column.id,
               content_id: issueNumber,
               content_type: 'Issue'
             });
+          }
 
+          updateIssue().catch(err => {
+            console.error(err);
+            process.exit(1);
+          });
+          EOF
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       #-----------------------------------------------------------------------------------------------------------------
       #  ME LOGUEO A MI MAQUINA A TRAVÉS DE SSH CON REVERSE PROXY USANDO NGROK Y OBTENGO LA ULTIMA VERSION DE LA IMAGEN
       #  GENERO EL CONTENEDOR Y LO DEJO CORRIENDO
