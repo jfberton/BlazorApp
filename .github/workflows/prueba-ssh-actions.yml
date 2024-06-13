@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - master  # Usar la rama master
+      - hola  # Usar la rama master
 
 jobs:
   build:
