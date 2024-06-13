@@ -13,74 +13,62 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3  # Actualizado a v3
 
-      - name: Extract issue number from commit message
-        id: extract-issue-number
-        run: |
-          commit_message="${{ github.event.head_commit.message }}"
-          issue_number=$(echo "$commit_message" | grep -oP '#\d+' | grep -oP '\d+' | head -1 || echo "")
-          echo "::set-output name=issue_number::$issue_number"
-      
-      - name: Install Node.js (updated version)
-        uses: actions/setup-node@v3
+      - name: Mover tarea al hacer commit
+        uses: actions/github-script@v6
         with:
-          node-version: '18'  # Or any versión 18 or higher
+          script: |
+            const github = require('@actions/github');
+            const context = github.context;
+            const projectName = 'Mi super proyecto para Ing. de Software'; 
+            const columnName = 'In review'; 
+            const taskRegex = /#(\d+)/; // Regex para identificar el número de tarea
 
-      - name: Install octokit/core module
-        run: npm install @octokit/core
+            // Obtener el mensaje del commit
+            const commitMessage = context.payload.commits[0].message;
+            const taskNumberMatch = commitMessage.match(taskRegex);
 
-      - name: Install node-fetch (opcional, pero recomendado para Node.js v16)
-        run: npm install node-fetch  # Este paso es nuevo
+            if (taskNumberMatch) {
+              const taskNumber = taskNumberMatch[1];
 
-      - name: Crear script updateIssue.mjs
-        run: |
-          echo "import { Octokit } from '@octokit/core';
-          import fetch from 'node-fetch';
-          async function updateIssue() {
-            const project_name = 'Mi super proyecto para Ing. de Software';
-            const column_name = 'In review';
-            const issueNumber = process.env.ISSUE_NUMBER;
-            const owner = process.env.GITHUB_REPOSITORY_OWNER;
-            const repo = process.env.GITHUB_REPOSITORY;
-            const pat = process.env.PAT;
+              // Obtener todos los proyectos
+              const projects = await github.rest.projects.listForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
 
-            const octokit = new Octokit({
-              auth: pat,
-            });
+              // Encontrar el proyecto específico
+              const project = projects.data.find(p => p.name === projectName);
+              if (!project) {
+                throw new Error(`Proyecto '${projectName}' no encontrado.`);
+              }
 
-            console.log('Owner:', owner);
-            console.log('Repository:', repo);
-            console.log('Issue Number:', issueNumber);
-            const projects = await octokit.request(\`GET /repos/\${repo}/projects\`);
-            const project = projects.data.find(proj => proj.name === project_name);
-            if (!project) {
-              throw new Error(\`Proyecto \${project_name} no encontrado\`);
-            }
-            const columns = await octokit.request(\`GET /projects/\${project.id}/columns\`);
-            const column = columns.data.find(col => col.name === column_name);
-            if (!column) {
-              throw new Error(\`Columna \${column_name} no encontrada\`);
-            }
-            const response = await octokit.request('POST /projects/columns/\${column.id}/cards', {
-              column_id: column.id,
-              content_id: issueNumber,
-              content_type: 'Issue',
-              request: { fetch },
-            });
-            console.log('Estado del issue actualizado exitosamente:', response.data);
-          }
-          updateIssue().catch(err => {
-            console.error(err);
-            process.exit(1);
-          });
-          export { updateIssue };" > updateIssue.mjs
+              // Obtener las columnas del proyecto
+              const columns = await github.rest.projects.listColumns({
+                project_id: project.id,
+              });
 
-      - name: Actualizar estado del issue
-        if: steps.extract-issue-number.outputs.issue_number != ''
-        run: |
-          ISSUE_NUMBER="${{ steps.extract-issue-number.outputs.issue_number }}"
-          PAT="${{ secrets.MY_OTHER_PAT }}"
-          GITHUB_REPOSITORY="${{ github.repository }}"
-          
-          node --experimental-modules updateIssue.mjs
+              // Encontrar la columna específica
+              const column = columns.data.find(c => c.name === columnName);
+              if (!column) {
+                throw new Error(`Columna '${columnName}' no encontrada.`);
+              }
+
+              // Obtener las tarjetas de la columna actual del issue
+              const cards = await github.rest.projects.listCards({
+                column_id: column.id,
+              });
+
+              // Encontrar la tarjeta específica del issue
+              const card = cards.data.find(card => card.content_url.endsWith(taskNumber));
+              if (!card) {
+                throw new Error(`Tarjeta del issue #${taskNumber} no encontrada en la columna actual.`);
+              }
+
+              // Mover la tarjeta a la columna deseada
+              await github.rest.projects.moveCard({
+                card_id: card.id,
+                position: 'top',
+                column_id: column.id,
+              });
 
       
