@@ -3,7 +3,7 @@ name: Mover Tarea a Columna Específica en Proyecto de Usuario
 on:
   push:
     branches:
-      - master
+      - notthemaster
 
 jobs:
   move_issue:
@@ -46,6 +46,8 @@ jobs:
             const projectIdResponse = await github.graphql(projectIdQuery, {
               login: 'jfberton' // Reemplaza con el nombre del usuario del proyecto
             });
+
+            console.log('Proyectos del usuario:', projectIdResponse.user.projectsV2.nodes);
 
             const project = projectIdResponse.user.projectsV2.nodes.find(project => project.title === project_name);
             if (!project) {
