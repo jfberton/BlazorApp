@@ -17,7 +17,6 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const github = require('@actions/github');
             const context = github.context;
             const projectName = 'Mi super proyecto para Ing. de Software'; 
             const columnName = 'In review'; 
