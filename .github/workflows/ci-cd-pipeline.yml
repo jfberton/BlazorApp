@@ -105,7 +105,7 @@ jobs:
       - name: Install octokit/core module
         run: npm install @octokit/core
 
-      - name: Create updateIssue.js script
+      - name: Create updateIssue.mjs script
         run: |
           echo 'import { Octokit } from "@octokit/core";
           const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
@@ -139,12 +139,12 @@ jobs:
           updateIssue().catch(err => {
             console.error(err);
             process.exit(1);
-          });' > /home/runner/work/BlazorApp/BlazorApp/updateIssue.js
+          });' > /home/runner/work/BlazorApp/BlazorApp/updateIssue.mjs
 
       - name: Update issue status
         if: steps.extract-issue-number.outputs.issue_number != ''
         run: |
-          ISSUE_NUMBER="${{ steps.extract-issue-number.outputs.issue_number }}" node /home/runner/work/BlazorApp/BlazorApp/updateIssue.js
+          ISSUE_NUMBER="${{ steps.extract-issue-number.outputs.issue_number }}" node --experimental-modules /home/runner/work/BlazorApp/BlazorApp/updateIssue.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
