@@ -3,17 +3,28 @@ name: Mover Tarea a Columna Específica en Proyecto de Usuario
 on:
   push:
     branches:
-      - notthemaster
+      - master
 
 jobs:
   move_issue:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Extraer número de issue del mensaje del commit
+        id: extract_issue_number
+        run: |
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          ISSUE_NUMBER=$(echo "$COMMIT_MESSAGE" | grep -oE '#[0-9]+' | tr -d '#')
+          echo "::set-output name=issue_number::$ISSUE_NUMBER"
+        
       - name: Mover issue al cambiar label
+        if: steps.extract_issue_number.outputs.issue_number
         uses: actions/github-script@v6
         with:
           script: |
-            const issue_number = github.context.issue.number;
+            const issue_number = parseInt("${{ steps.extract_issue_number.outputs.issue_number }}", 10);
             const project_name = 'Super proyecto'; // Reemplaza con el nombre de tu proyecto
             const column_name = 'In review'; // Reemplaza con el nombre de la columna deseada
             // Consulta GraphQL para obtener el ID del proyecto
