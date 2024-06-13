@@ -20,10 +20,10 @@ jobs:
           issue_number=$(echo "$commit_message" | grep -oP '#\d+' | grep -oP '\d+' | head -1 || echo "")
           echo "::set-output name=issue_number::$issue_number"
       
-      - name: Install Node.js
+      - name: Install Node.js (updated version)
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Version compatible de Node.js
+          node-version: '18'  # Or any version 18 or higher
 
       - name: Install octokit/core module
         run: npm install @octokit/core
