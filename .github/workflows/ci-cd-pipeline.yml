@@ -86,6 +86,61 @@ jobs:
         run: docker push "${{ secrets.DOCKER_USERNAME }}"/myblazorapp:latest
 
       #-----------------------------------------------------------------------------------------------------------------
+      #  SI SE PUBLICO CORRECTAMENTE EN DOCKERHUB Y TIENE UNA TAREA ASOCIADA ACTUALIZO MANDO ESA TAREA A IN REVIEW
+      #  EJEMPLO DE COMMIT MESSAGE: "Correccion de error, refs #42"
+      #-----------------------------------------------------------------------------------------------------------------
+
+      - name: Extract issue number from commit message
+        id: extract-issue-number
+        run: |
+          commit_message="${{ github.event.head_commit.message }}"
+          issue_number=$(echo "$commit_message" | grep -oP '#\d+' | grep -oP '\d+' | head -1 || echo "")
+          echo "::set-output name=issue_number::$issue_number"
+      
+      - name: Update issue status
+        if: steps.extract-issue-number.outputs.issue_number != ''
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = '${{ steps.extract-issue-number.outputs.issue_number }}';
+            const project_name = 'Mi super proyecto para Ing. de Software';
+            const column_name = 'In review';
+      
+            const { Octokit } = require('@octokit/core');
+            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+      
+            // Get project ID
+            const { data: projects } = await octokit.request('GET /repos/{owner}/{repo}/projects', {
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+      
+            const project = projects.find(proj => proj.name === project_name);
+      
+            if (!project) {
+              throw new Error(`Project ${project_name} not found`);
+            }
+      
+            // Get column ID
+            const { data: columns } = await octokit.request('GET /projects/{project_id}/columns', {
+              project_id: project.id
+            });
+      
+            const column = columns.find(col => col.name === column_name);
+      
+            if (!column) {
+              throw new Error(`Column ${column_name} not found`);
+            }
+      
+            // Move issue to the column
+            await octokit.request('POST /projects/columns/{column_id}/cards', {
+              column_id: column.id,
+              content_id: issueNumber,
+              content_type: 'Issue'
+            });
+
+      #-----------------------------------------------------------------------------------------------------------------
       #  ME LOGUEO A MI MAQUINA A TRAVÉS DE SSH CON REVERSE PROXY USANDO NGROK Y OBTENGO LA ULTIMA VERSION DE LA IMAGEN
       #  GENERO EL CONTENEDOR Y LO DEJO CORRIENDO
       #-----------------------------------------------------------------------------------------------------------------
