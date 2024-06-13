@@ -44,10 +44,7 @@ jobs:
             const pat = process.env.PAT;
 
             const octokit = new Octokit({
-              auth: {
-                token: pat,
-                tokenType: 'oauth',
-              },
+              auth: pat,
             });
 
             console.log('Owner:', owner);
