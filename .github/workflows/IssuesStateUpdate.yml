@@ -16,6 +16,7 @@ jobs:
       - name: Mover tarea al hacer commit
         uses: actions/github-script@v6
         with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const projectName = 'Mi super proyecto para Ing. de Software'; 
             const columnName = 'In review'; 
