@@ -22,53 +22,42 @@ jobs:
             const projectName = 'Mi super proyecto para Ing. de Software'; 
             const columnName = 'In review'; 
             const taskRegex = /#(\d+)/; // Regex para identificar el número de tarea
-
             // Obtener el mensaje del commit
             const commitMessage = context.payload.commits[0].message;
             const taskNumberMatch = commitMessage.match(taskRegex);
-
             if (taskNumberMatch) {
               const taskNumber = taskNumberMatch[1];
-
               // Obtener todos los proyectos
               const projects = await github.rest.projects.listForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
               });
-
               // Encontrar el proyecto específico
               const project = projects.data.find(p => p.name === projectName);
               if (!project) {
                 throw new Error(`Proyecto '${projectName}' no encontrado.`);
               }
-
               // Obtener las columnas del proyecto
               const columns = await github.rest.projects.listColumns({
                 project_id: project.id,
               });
-
               // Encontrar la columna específica
               const column = columns.data.find(c => c.name === columnName);
               if (!column) {
                 throw new Error(`Columna '${columnName}' no encontrada.`);
               }
-
               // Obtener las tarjetas de la columna actual del issue
               const cards = await github.rest.projects.listCards({
                 column_id: column.id,
               });
-
               // Encontrar la tarjeta específica del issue
               const card = cards.data.find(card => card.content_url.endsWith(taskNumber));
               if (!card) {
                 throw new Error(`Tarjeta del issue #${taskNumber} no encontrada en la columna actual.`);
               }
-
               // Mover la tarjeta a la columna deseada
               await github.rest.projects.moveCard({
                 card_id: card.id,
                 position: 'top',
                 column_id: column.id,
               });
-
-      
