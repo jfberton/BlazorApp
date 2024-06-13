@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - hola  # Usar la rama master
+      - master  # Usar la rama master
 
 jobs:
   build:
@@ -27,6 +27,18 @@ jobs:
       - name: Run tests
         run: dotnet test --verbosity normal ./BlazorApp.Test/BlazorApp.Test.csproj  # Ruta correcta
 
+      - name: Use SonarCloud scanner
+        uses: SonarSource/sonarcloud-github-action@v3.4.0
+        with:
+          organization: jfberton
+          projectKey: jfberton_BlazorApp
+          authToken: ${{ secrets.SONAR_TOKEN }}
+          # Optional: If your SonarCloud server is not at https://sonarcloud.io
+          # sonarCloudUrl: https://<your-sonarcloud-server>
+
+      - name: Run SonarCloud analysis
+        run: |
+          sonar-scanner -Dsonar.projectKey=jfberton_BlazorApp -Dsonar.organization=jfberton
       
       - name: Publish the app
         run: dotnet publish --configuration Release --output ./publish ./BlazorApp.csproj  # Ruta correcta
