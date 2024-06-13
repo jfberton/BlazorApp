@@ -36,7 +36,12 @@ jobs:
           echo "import { Octokit } from '@octokit/core';
           import fetch from 'node-fetch';
 
-          const octokit = new Octokit({ auth: process.env.PAT });
+          const octokit = new Octokit({
+            auth: {
+              token: process.env.PAT,
+              tokenType: 'oauth',
+            },
+          });
 
           async function updateIssue() {
             const project_name = 'Mi super proyecto para Ing. de Software';
