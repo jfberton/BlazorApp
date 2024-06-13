@@ -35,7 +35,6 @@ jobs:
         run: |
           echo "import { Octokit } from '@octokit/core';
           import fetch from 'node-fetch';
-
           async function updateIssue() {
             const project_name = 'Mi super proyecto para Ing. de Software';
             const column_name = 'In review';
@@ -43,48 +42,40 @@ jobs:
             const owner = process.env.GITHUB_REPOSITORY_OWNER;
             const repo = process.env.GITHUB_REPOSITORY;
             const pat = process.env.PAT;
-            
+
             const octokit = new Octokit({
               auth: {
-                token: '${path}',
+                token: pat,
                 tokenType: 'oauth',
               },
             });
 
-            console.log('Owner: ${owner}');
-            console.log('Repository: ${repo}');
-            console.log('Issue Number: ${issueNumber}');
-
-            const projects = await octokit.request(\'GET /repos/\${repo}/projects\');
+            console.log('Owner:', owner);
+            console.log('Repository:', repo);
+            console.log('Issue Number:', issueNumber);
+            const projects = await octokit.request(\`GET /repos/\${repo}/projects\`);
             const project = projects.data.find(proj => proj.name === project_name);
-
             if (!project) {
-              throw new Error(\'Proyecto \${project_name} no encontrado\');
+              throw new Error(\`Proyecto \${project_name} no encontrado\`);
             }
-
-            const columns = await octokit.request(\'GET /projects/\${project.id}/columns\');
+            const columns = await octokit.request(\`GET /projects/\${project.id}/columns\`);
             const column = columns.data.find(col => col.name === column_name);
-
             if (!column) {
-              throw new Error(\'Columna \${column_name} no encontrada\');
+              throw new Error(\`Columna \${column_name} no encontrada\`);
             }
-
             const response = await octokit.request('POST /projects/columns/\${column.id}/cards', {
               column_id: column.id,
               content_id: issueNumber,
               content_type: 'Issue',
               request: { fetch },
             });
-
             console.log('Estado del issue actualizado exitosamente:', response.data);
           }
-
           updateIssue().catch(err => {
             console.error(err);
             process.exit(1);
           });
-
-          export { updateIssue };" > /home/runner/work/BlazorApp/BlazorApp/updateIssue.mjs
+          export { updateIssue };" > updateIssue.mjs
 
       - name: Actualizar estado del issue
         if: steps.extract-issue-number.outputs.issue_number != ''
@@ -93,6 +84,6 @@ jobs:
           PAT="${{ secrets.MY_OTHER_PAT }}"
           GITHUB_REPOSITORY="${{ github.repository }}"
           
-          node --experimental-modules /home/runner/work/BlazorApp/BlazorApp/updateIssue.mjs
+          node --experimental-modules updateIssue.mjs
 
       
